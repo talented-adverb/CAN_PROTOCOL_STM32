@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := CAN_BUS_SETUP
+BUILD_ARTIFACT_NAME := CAN_PROTOCOL_STM32
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-CAN_BUS_SETUP.elf \
+CAN_PROTOCOL_STM32.elf \
 
 MAP_FILES += \
-CAN_BUS_SETUP.map \
+CAN_PROTOCOL_STM32.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-CAN_BUS_SETUP.list \
+CAN_PROTOCOL_STM32.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: CAN_BUS_SETUP.elf secondary-outputs
+main-build: CAN_PROTOCOL_STM32.elf secondary-outputs
 
 # Tool invocations
-CAN_BUS_SETUP.elf CAN_BUS_SETUP.map: $(OBJS) $(USER_OBJS) C:\Users\pratham\STM32CubeIDE\workspace_1.17.0\CAN_BUS_SETUP\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "CAN_BUS_SETUP.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\pratham\STM32CubeIDE\workspace_1.17.0\CAN_BUS_SETUP\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CAN_BUS_SETUP.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+CAN_PROTOCOL_STM32.elf CAN_PROTOCOL_STM32.map: $(OBJS) $(USER_OBJS) C:\Users\pratham\STM32CubeIDE\workspace_1.17.0\CAN_PROTOCOL_STM32\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "CAN_PROTOCOL_STM32.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\pratham\STM32CubeIDE\workspace_1.17.0\CAN_PROTOCOL_STM32\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CAN_PROTOCOL_STM32.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-CAN_BUS_SETUP.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "CAN_BUS_SETUP.list"
+CAN_PROTOCOL_STM32.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "CAN_PROTOCOL_STM32.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) CAN_BUS_SETUP.elf CAN_BUS_SETUP.list CAN_BUS_SETUP.map default.size.stdout
+	-$(RM) CAN_PROTOCOL_STM32.elf CAN_PROTOCOL_STM32.list CAN_PROTOCOL_STM32.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

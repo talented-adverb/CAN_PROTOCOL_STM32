@@ -49,10 +49,10 @@ CAN_FilterTypeDef Scanfilter;
 CAN_RxHeaderTypeDef RxHeader;
 CAN_TxHeaderTypeDef TxHeader;
 
-unit32 TxMailbox;
+uint32_t TxMailbox;
 
-unit8 TxData[1];
-unit8 RxData[1];
+uint8_t TxData[1];
+uint8_t RxData[1];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -191,7 +191,30 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
+  TxHeader.IDE=CAN_ID_STD;
+  TxHeader.StdId=0x11;
+  TxHeader.RTR=CAN_RTR_DATA;
+  TxHeader.DLC=1;
+
+
 Scanfilter.FilterActivation=CAN_FILTER_ENABLE;
+Scanfilter.FilterBank=0;
+Scanfilter.FilterFIFOAssignment=CAN_FILTER_FIFO0;
+Scanfilter.FilterIdHigh=0x0000;
+Scanfilter.FilterIdLow=0x0000;
+Scanfilter.FilterMaskIdHigh=0x0000;
+Scanfilter.FilterMaskIdLow=0x0000;
+Scanfilter.FilterMode=CAN_FILTERMODE_IDMASK;
+Scanfilter.FilterScale=CAN_FILTERSCALE_32BIT;
+Scanfilter.SlaveStartFilterBank=14;
+
+if(HAL_CAN_ConfigFilter(&hcan1, &Scanfilter)!=HAL_OK){
+	Error_Handler();
+}
+if(HAL_CAN_Start(&hcan1)!=HAL_OK){
+	Error_Handler();
+}
+
   /* USER CODE END CAN1_Init 2 */
 
 }
@@ -238,7 +261,11 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+// When the Rx of MC detects that the message is coming in the RXFIFO0
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0,&RxHeader, RxData);
+}
 /* USER CODE END 4 */
 
 /**
