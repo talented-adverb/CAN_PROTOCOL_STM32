@@ -41,7 +41,14 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+extern CAN_FilterTypeDef Scanfilter;
+extern CAN_RxHeaderTypeDef RxHeader;
+extern CAN_TxHeaderTypeDef TxHeader;
 
+extern uint32_t TxMailbox;
+
+extern uint8_t TxData[1];
+extern uint8_t RxData[1];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -264,6 +271,10 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+  if(HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13)==0){
+	  HAL_CAN_AddTxMessage(&hcan1,&TxHeader,TxData, &TxMailbox);
+  }
+
 
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
