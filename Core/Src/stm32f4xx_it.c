@@ -272,7 +272,11 @@ void EXTI15_10_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
   if(HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13)==0){
+	  if(TxData[0]==0x03){
+		  TxData[0]==0;
+	  }
 	  HAL_CAN_AddTxMessage(&hcan1,&TxHeader,TxData, &TxMailbox);
+	  TxData[0]++;
   }
 
 
