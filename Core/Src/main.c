@@ -189,7 +189,7 @@ static void MX_CAN1_Init(void)
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;//detects timing error
   hcan1.Init.TimeSeg1 = CAN_BS1_4TQ;//Synchronizes nodes-> how long the data bits are sampled
   hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;//Defines post-sampling timing handle phase errors
-  hcan1.Init.TimeTriggeredMode = DISABLE;//Check if BMS and MC expects timesstamps
+  hcan1.Init.TimeTriggeredMode = DISABLE;//Check if BMS and MC expects timestamps
   hcan1.Init.AutoBusOff = DISABLE;//If enabled, the MCU auto. retries after a cool-down period
   hcan1.Init.AutoWakeUp = DISABLE;// For power saving, get's enabled only if CAN-traffic is incoming
   hcan1.Init.AutoRetransmission = ENABLE;// Auto. retries failed transmission
