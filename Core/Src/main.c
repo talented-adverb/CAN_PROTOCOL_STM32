@@ -17,7 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#include "main.h" //Includes HAL Library functions
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -42,17 +42,17 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-CAN_HandleTypeDef hcan1;
+CAN_HandleTypeDef hcan1; //CAN handle to control CAN1 peripheral
 
 /* USER CODE BEGIN PV */
-CAN_FilterTypeDef Scanfilter;
-CAN_RxHeaderTypeDef RxHeader;
-CAN_TxHeaderTypeDef TxHeader;
+CAN_FilterTypeDef Scanfilter;//Struct to define CAN filter config
+CAN_RxHeaderTypeDef RxHeader; // hold metadeta(ID, DLC) for received messages
+CAN_TxHeaderTypeDef TxHeader;//hold metadeta(ID, DLC) for transmitted messages
 
-uint32_t TxMailbox;
+uint32_t TxMailbox; //buffer for transmission
 
-uint8_t TxData[1];
-uint8_t RxData[1];
+uint8_t TxData[1];//Stores 1 byte for transmission
+uint8_t RxData[1];//For receiving
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,6 +60,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_CAN1_Init(void);
 /* USER CODE BEGIN PFP */
+
 
 /* USER CODE END PFP */
 
@@ -82,24 +83,24 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+  HAL_Init();//Reset peripherals, Flash interface and Systick
 
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
 
   /* Configure the system clock */
-  SystemClock_Config();
+  SystemClock_Config();//Configures system clock
 
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
+  MX_GPIO_Init();//Initialize GPIO and CAN peripherals
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING|CAN_IT_RX_FIFO1_MSG_PENDING);
+  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING|CAN_IT_RX_FIFO1_MSG_PENDING);//Enables CAN interrups when messages arrive in FIFO1
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -110,14 +111,15 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  if(RxData[0]==0x01){
-		  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET);
+		  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET);//For debugging purpose
 
 	  }
-	  if(RxData[0]=0x02){
+	  if(RxData[0]==0x02){
 		  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_RESET);
-	  }
+
   }
   /* USER CODE END 3 */
+}
 }
 
 /**
@@ -181,18 +183,18 @@ static void MX_CAN1_Init(void)
   /* USER CODE BEGIN CAN1_Init 1 */
 
   /* USER CODE END CAN1_Init 1 */
-  hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 16;
-  hcan1.Init.Mode = CAN_MODE_NORMAL;
-  hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan1.Init.TimeSeg1 = CAN_BS1_4TQ;
-  hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
-  hcan1.Init.TimeTriggeredMode = DISABLE;
-  hcan1.Init.AutoBusOff = DISABLE;
-  hcan1.Init.AutoWakeUp = DISABLE;
-  hcan1.Init.AutoRetransmission = ENABLE;
-  hcan1.Init.ReceiveFifoLocked = DISABLE;
-  hcan1.Init.TransmitFifoPriority = DISABLE;
+  hcan1.Instance = CAN1;//For mulitple CAN we use hcan2
+  hcan1.Init.Prescaler = 16;//Controls CAN bit timing(baud rate).
+  hcan1.Init.Mode = CAN_MODE_NORMAL;//Open declaration to see info about multiple modes
+  hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;//detects timing error
+  hcan1.Init.TimeSeg1 = CAN_BS1_4TQ;//Synchronizes nodes-> how long the data bits are sampled
+  hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;//Defines post-sampling timing handle phase errors
+  hcan1.Init.TimeTriggeredMode = DISABLE;//Check if BMS and MC expects timesstamps
+  hcan1.Init.AutoBusOff = DISABLE;//If enabled, the MCU auto. retries after a cool-down period
+  hcan1.Init.AutoWakeUp = DISABLE;// For power saving, get's enabled only if CAN-traffic is incoming
+  hcan1.Init.AutoRetransmission = ENABLE;// Auto. retries failed transmission
+  hcan1.Init.ReceiveFifoLocked = DISABLE;// Blocks new messages when FIFO is full. Must be disabled to refresh data if BMS sends data fast
+  hcan1.Init.TransmitFifoPriority = DISABLE;// If enabled smaller IDs transmit first..
   if (HAL_CAN_Init(&hcan1) != HAL_OK)
   {
     Error_Handler();
@@ -205,17 +207,17 @@ static void MX_CAN1_Init(void)
 
 
 Scanfilter.FilterActivation=CAN_FILTER_ENABLE;
-Scanfilter.FilterBank=0;
-Scanfilter.FilterFIFOAssignment=CAN_FILTER_FIFO0;
-Scanfilter.FilterIdHigh=0x0000;
-Scanfilter.FilterIdLow=0x0000;
-Scanfilter.FilterMaskIdHigh=0xFFFF;
-Scanfilter.FilterMaskIdLow=0x0000;
-Scanfilter.FilterMode=CAN_FILTERMODE_IDMASK;
-Scanfilter.FilterScale=CAN_FILTERSCALE_32BIT;
-Scanfilter.SlaveStartFilterBank=14;
+Scanfilter.FilterBank=0;//Each filter holds one or more filter banks
+Scanfilter.FilterFIFOAssignment=CAN_FILTER_FIFO0;//Incoming messages go to FIFO0. Stm32 has 2 FIFO lines with FIFO0 having higher priority.
+Scanfilter.FilterIdHigh=0x0000;//hold 11 bits for standard CAN
+Scanfilter.FilterIdLow=0x0000;//Stays 0 for standard IDs but for 29 bits both high and low hold the ID together
+Scanfilter.FilterMaskIdHigh=0xFFFF;;//Specifies which ID to accept(ID must match entirely)
+Scanfilter.FilterMaskIdLow=0x0000;//Ignores the low part entirely
+Scanfilter.FilterMode=CAN_FILTERMODE_IDMASK;//Better  for ranges
+Scanfilter.FilterScale=CAN_FILTERSCALE_32BIT;//Better for specific IDs
+Scanfilter.SlaveStartFilterBank=14;//defines where CAN2 filter 2 start
 
-if(HAL_CAN_ConfigFilter(&hcan1, &Scanfilter)!=HAL_OK){
+if(HAL_CAN_ConfigFilter(&hcan1, &Scanfilter)!=HAL_OK){//To process only relevant messages
 	Error_Handler();
 }
 if(HAL_CAN_Start(&hcan1)!=HAL_OK){
@@ -231,7 +233,7 @@ if(HAL_CAN_Start(&hcan1)!=HAL_OK){
   * @param None
   * @retval None
   */
-static void MX_GPIO_Init(void)
+static void MX_GPIO_Init(void)//
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
@@ -244,7 +246,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);//This set according to the configuration done in the IOC file.
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
