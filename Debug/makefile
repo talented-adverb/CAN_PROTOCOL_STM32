@@ -61,7 +61,7 @@ main-build: CAN_PROTOCOL_STM32.elf secondary-outputs
 
 # Tool invocations
 CAN_PROTOCOL_STM32.elf CAN_PROTOCOL_STM32.map: $(OBJS) $(USER_OBJS) C:\Users\pratham\STM32CubeIDE\workspace_1.17.0\CAN_PROTOCOL_STM32\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "CAN_PROTOCOL_STM32.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\pratham\STM32CubeIDE\workspace_1.17.0\CAN_PROTOCOL_STM32\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CAN_PROTOCOL_STM32.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "CAN_PROTOCOL_STM32.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\pratham\STM32CubeIDE\workspace_1.17.0\CAN_PROTOCOL_STM32\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CAN_PROTOCOL_STM32.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -51,8 +51,8 @@ CAN_TxHeaderTypeDef TxHeader;//hold metadeta(ID, DLC) for transmitted messages
 
 uint32_t TxMailbox; //buffer for transmission
 
-uint8_t TxData[1];//Stores 1 byte for transmission
-uint8_t RxData[1];//For receiving
+uint8_t TxData[8];//Stores 1 byte for transmission
+uint8_t RxData[8];//For receiving
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,6 +66,32 @@ static void MX_CAN1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void Decode_CAN_Message(uint8_t *data) {
+    // Decode Pack Current (Byte 0 and Byte 1)
+    uint16_t packCurrentRaw = (data[0] << 8) | data[1]; // Combine bytes using left shift
+    float packCurrent = packCurrentRaw * 0.1;           // Apply scaling factor (resolution: 0.1 A)
+
+    // Decode Average Temperature (Byte 2 and Byte 3)
+    uint16_t averageTempRaw = (data[2] << 8) | data[3]; // Combine bytes using left shift
+    float averageTemperature = averageTempRaw * 0.1;    // Apply scaling factor (resolution: 0.1 °C)
+
+    // Decode Pack SOC (Byte 4)
+    uint8_t packSOC = data[4];                          // Direct value (percentage, no scaling specified)
+
+    // Decode Pack Inst. Voltage (Byte 5 and Byte 6)
+    uint16_t packVoltageRaw = (data[5] << 8) | data[6]; // Combine bytes using left shift
+    float packVoltage = packVoltageRaw * 0.1;           // Apply scaling factor (resolution: 0.1 V)
+
+    // Decode Max Cell Number (Byte 7)
+    uint8_t maxCellNumber = data[7];                    // Direct value (no scaling specified)
+
+    // Print decoded values
+    printf("Pack Current: %.1f A\n", packCurrent);
+    printf("Average Temperature: %.1f °C\n", averageTemperature);
+    printf("Pack SOC: %d %%\n", packSOC);
+    printf("Pack Voltage: %.1f V\n", packVoltage);
+    printf("Max Cell Number: %d\n", maxCellNumber);
+}
 
 /* USER CODE END 0 */
 
@@ -110,17 +136,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if(RxData[0]==0x01){
-		  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET);//For debugging purpose
-
-	  }
-	  if(RxData[0]==0x02){
-		  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_RESET);
+	Decode_CAN_Message(RxData);
 
   }
   /* USER CODE END 3 */
 }
-}
+
 
 /**
   * @brief System Clock Configuration
@@ -200,19 +221,19 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
-  TxHeader.IDE=CAN_ID_STD;
-  TxHeader.StdId=0x11;
-  TxHeader.RTR=CAN_RTR_DATA;
-  TxHeader.DLC=1;
+  RxHeader.IDE=CAN_ID_EXT;
+  RxHeader.ExtId=0x10000010;
+  RxHeader.RTR=CAN_RTR_DATA;
+  RxHeader.DLC=8;
 
 
 Scanfilter.FilterActivation=CAN_FILTER_ENABLE;
 Scanfilter.FilterBank=0;//Each filter holds one or more filter banks
 Scanfilter.FilterFIFOAssignment=CAN_FILTER_FIFO0;//Incoming messages go to FIFO0. Stm32 has 2 FIFO lines with FIFO0 having higher priority.
-Scanfilter.FilterIdHigh=0x0000;//hold 11 bits for standard CAN
-Scanfilter.FilterIdLow=0x0000;//Stays 0 for standard IDs but for 29 bits both high and low hold the ID together
+Scanfilter.FilterIdHigh = (0x10000010 >> 13) & 0xFFFF;
+Scanfilter.FilterIdLow = ((0x10000010 << 3) & 0xFFFF) | (1 << 2); // Set IDE bit//Stays 0 for standard IDs but for 29 bits both high and low hold the ID together
 Scanfilter.FilterMaskIdHigh=0xFFFF;;//Specifies which ID to accept(ID must match entirely)
-Scanfilter.FilterMaskIdLow=0x0000;//Ignores the low part entirely
+Scanfilter.FilterMaskIdLow=0xFFFF;//Ignores the low part entirely
 Scanfilter.FilterMode=CAN_FILTERMODE_IDMASK;//Better  for ranges
 Scanfilter.FilterScale=CAN_FILTERSCALE_32BIT;//Better for specific IDs
 Scanfilter.SlaveStartFilterBank=14;//defines where CAN2 filter 2 start
